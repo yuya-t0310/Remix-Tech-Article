@@ -1,3 +1,33 @@
+# 環境構築
+```shellscript
+npx create-remix@latest
+
+mkdir my-remix-app
+cd my-remix-app
+npm init -y
+ 
+# ランタイム依存関係をインストール
+npm i @remix-run/node @remix-run/react @remix-run/serve isbot@4 react react-dom
+ 
+# 開発依存関係をインストール
+npm i -D @remix-run/dev vite
+
+npm i express @remix-run/express cross-env
+
+node server.js
+node --inspect server.js
+
+npm install
+
+# prisma
+npx prisma
+npx prisma init
+npx prisma migrate dev --name add_article_model
+
+# invariant
+npm i tiny-invariant
+```
+
 # Welcome to Remix!
 
 - 📖 [Remix docs](https://remix.run/docs)
