@@ -26,6 +26,9 @@ npx prisma migrate dev --name add_article_model
 
 # invariant
 npm i tiny-invariant
+# bycript
+npm i bcryptjs
+npm i -D @types/bcryptjs
 ```
 
 # Welcome to Remix!
