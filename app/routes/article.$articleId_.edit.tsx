@@ -29,7 +29,6 @@ export const action = async ({ params, request }: ActionFunctionArgs) => {
     },
     data: {
       title: update.title as string,
-      author: update.author as string,
       content: update.content as string,
     },
   });
@@ -38,6 +37,7 @@ export const action = async ({ params, request }: ActionFunctionArgs) => {
 
 export default function EditArticle() {
   const { article } = useLoaderData<typeof loader>();
+  console.log(article);
 
   return (
     <>
@@ -51,17 +51,7 @@ export default function EditArticle() {
               type="text"
               aria-label="Title"
               placeholder="Title"
-              value={article.title}
-            ></input>
-          </p>
-          <p>
-            <span>Author</span>
-            <input
-              name="author"
-              type="text"
-              aria-label="Author"
-              placeholder="Author"
-              value={article.author}
+              defaultValue={article.title}
             ></input>
           </p>
           <p>
@@ -70,7 +60,7 @@ export default function EditArticle() {
               name="content"
               rows={12}
               placeholder="Write your article..."
-              value={article.content}
+              defaultValue={article.content}
             ></textarea>
           </p>
           <p>
