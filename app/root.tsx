@@ -5,11 +5,13 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
+  useLoaderData,
 } from "@remix-run/react";
-import type { LinksFunction } from "@remix-run/node";
+import type { LinksFunction, LoaderFunctionArgs } from "@remix-run/node";
 import Header from "./components/Header";
 
 import "./tailwind.css";
+import { getSession } from "./sessions";
 
 export const links: LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -42,10 +44,18 @@ export const links: LinksFunction = () => [
 //   );
 // }
 
+export const loader = async ({ request }: LoaderFunctionArgs) => {
+  const session = await getSession(request.headers.get("Cookie"));
+  const userId = session.get("userId");
+  return { userId };
+};
+
 export default function App() {
+  const { userId } = useLoaderData<typeof loader>();
+
   return (
     <html lang="jp">
-      <Header />
+      <Header userId={userId} />
       {/*その他の要素 */}
       <body>
         <div id="detail">
