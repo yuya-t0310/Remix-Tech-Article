@@ -1,14 +1,28 @@
 import { LoaderFunctionArgs } from "@remix-run/node";
 import prisma from "../../lib/prisma";
 import invariant from "tiny-invariant";
-import { Form, Link, useLoaderData } from "@remix-run/react";
+import { Form, useLoaderData } from "@remix-run/react";
+import { getUserFromSession } from "../data/auth.server";
 
-export const loader = async ({ params }: LoaderFunctionArgs) => {
+export const loader = async ({ params, request }: LoaderFunctionArgs) => {
+  // セッションからuserId取得
+  const userId = await getUserFromSession(request);
   // article.$articleId.tsx → $xxxをparam.xxxで取得できる
   invariant(params.articleId, "Missing articleId param");
   const article = await prisma.article.findFirst({
     where: {
       id: parseInt(params.articleId),
+    },
+    include: {
+      author: {
+        select: {
+          profile: {
+            select: {
+              name: true,
+            },
+          },
+        },
+      },
     },
   });
 
@@ -30,42 +44,48 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
     },
   });
 
-  return Response.json({ article });
+  return Response.json({ article, userId });
 };
 
 export default function Article() {
-  const { article } = useLoaderData<typeof loader>();
-  console.log(article);
+  const { article, userId } = useLoaderData<typeof loader>();
+  console.log(userId);
 
   return (
     <>
       <div id="article">
-        <div>{article.title}</div>
-        <div>{article.author}</div>
-        <div>{article.content}</div>
-        <div>{article.viewCount}</div>
+        <div>タイトル {article.title}</div>
+        <div>著者 {article.author.profile?.name}</div>
+        <div>コンテンツ {article.content}</div>
+        <div>閲覧数 {article.viewCount}</div>
       </div>
-      <div>
-        <Form action="edit">
-          <button type="submit">Edit</button>
-        </Form>
-      </div>
-      <div>
-        <Form
-          action="destroy"
-          method="post"
-          onSubmit={(event) => {
-            const response = confirm(
-              "Please confirm you want to delete this record."
-            );
-            if (!response) {
-              event.preventDefault();
-            }
-          }}
-        >
-          <button type="submit">Delete</button>
-        </Form>
-      </div>
+      {userId == article.authorId ? (
+        <div>
+          <div>
+            <Form action="edit">
+              <button type="submit">Edit</button>
+            </Form>
+          </div>
+          <div>
+            <Form
+              action="destroy"
+              method="post"
+              onSubmit={(event) => {
+                const response = confirm(
+                  "Please confirm you want to delete this record."
+                );
+                if (!response) {
+                  event.preventDefault();
+                }
+              }}
+            >
+              <button type="submit">Delete</button>
+            </Form>
+          </div>
+        </div>
+      ) : (
+        <></>
+      )}
     </>
   );
 }

@@ -2,8 +2,12 @@ import { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
 import { Form, redirect, useLoaderData } from "@remix-run/react";
 import prisma from "../../lib/prisma";
 import invariant from "tiny-invariant";
+import { requireUserSession } from "../data/auth.server";
 
-export const loader = async ({ params }: LoaderFunctionArgs) => {
+export const loader = async ({ params, request }: LoaderFunctionArgs) => {
+  // ログイン状態でなければトップページへリダイレクト
+  const userId = await requireUserSession(request, "/");
+
   invariant(params.articleId, "Missing articleId param");
   const article = await prisma.article.findFirst({
     where: {
@@ -13,6 +17,11 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
 
   if (!article) {
     throw new Response("Not Found", { status: 404 });
+  }
+
+  // 操作ユーザと著者ユーザが異なる場合トップページへリダイレクト
+  if (parseInt(userId) != article.authorId) {
+    return redirect("/");
   }
 
   return Response.json({ article });
@@ -29,7 +38,6 @@ export const action = async ({ params, request }: ActionFunctionArgs) => {
     },
     data: {
       title: update.title as string,
-      author: update.author as string,
       content: update.content as string,
     },
   });
@@ -38,6 +46,7 @@ export const action = async ({ params, request }: ActionFunctionArgs) => {
 
 export default function EditArticle() {
   const { article } = useLoaderData<typeof loader>();
+  console.log(article);
 
   return (
     <>
@@ -51,17 +60,7 @@ export default function EditArticle() {
               type="text"
               aria-label="Title"
               placeholder="Title"
-              value={article.title}
-            ></input>
-          </p>
-          <p>
-            <span>Author</span>
-            <input
-              name="author"
-              type="text"
-              aria-label="Author"
-              placeholder="Author"
-              value={article.author}
+              defaultValue={article.title}
             ></input>
           </p>
           <p>
@@ -70,7 +69,7 @@ export default function EditArticle() {
               name="content"
               rows={12}
               placeholder="Write your article..."
-              value={article.content}
+              defaultValue={article.content}
             ></textarea>
           </p>
           <p>
