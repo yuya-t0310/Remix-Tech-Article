@@ -10,6 +10,17 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
     where: {
       id: parseInt(params.articleId),
     },
+    include: {
+      author: {
+        select: {
+          profile: {
+            select: {
+              name: true,
+            },
+          },
+        },
+      },
+    },
   });
 
   if (!article) {
@@ -40,10 +51,10 @@ export default function Article() {
   return (
     <>
       <div id="article">
-        <div>{article.title}</div>
-        <div>{article.author}</div>
-        <div>{article.content}</div>
-        <div>{article.viewCount}</div>
+        <div>タイトル {article.title}</div>
+        <div>著者 {article.author.profile?.name}</div>
+        <div>コンテンツ {article.content}</div>
+        <div>閲覧数 {article.viewCount}</div>
       </div>
       <div>
         <Form action="edit">
