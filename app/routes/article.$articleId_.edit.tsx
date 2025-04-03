@@ -2,8 +2,12 @@ import { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
 import { Form, redirect, useLoaderData } from "@remix-run/react";
 import prisma from "../../lib/prisma";
 import invariant from "tiny-invariant";
+import { requireUserSession } from "../data/auth.server";
 
-export const loader = async ({ params }: LoaderFunctionArgs) => {
+export const loader = async ({ params, request }: LoaderFunctionArgs) => {
+  // ログイン状態でなければトップページへリダイレクト
+  const userId = await requireUserSession(request, "/");
+
   invariant(params.articleId, "Missing articleId param");
   const article = await prisma.article.findFirst({
     where: {
@@ -13,6 +17,11 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
 
   if (!article) {
     throw new Response("Not Found", { status: 404 });
+  }
+
+  // 操作ユーザと著者ユーザが異なる場合トップページへリダイレクト
+  if (parseInt(userId) != article.authorId) {
+    return redirect("/");
   }
 
   return Response.json({ article });
