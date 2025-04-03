@@ -31,6 +31,15 @@ npm i bcryptjs
 npm i -D @types/bcryptjs
 ```
 
+# 予定機能
+  * 記事の作成・閲覧・編集・削除
+    - Markdownに対応したい
+    - タグをつけてタグ検索できるようにしたい
+    - 作成したユーザのみが編集・削除できるようにしたい
+  * ログイン機能
+    - サインアップ
+    - ログイン状態による各画面の操作可否
+
 # Welcome to Remix!
 
 - 📖 [Remix docs](https://remix.run/docs)
