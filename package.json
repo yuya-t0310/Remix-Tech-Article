@@ -15,6 +15,7 @@
     "@remix-run/express": "^2.16.2",
     "@remix-run/node": "^2.16.2",
     "@remix-run/react": "^2.16.2",
+    "bcryptjs": "^3.0.2",
     "cross-env": "^7.0.3",
     "express": "^4.21.2",
     "isbot": "^4.4.0",
@@ -24,6 +25,7 @@
   },
   "devDependencies": {
     "@remix-run/dev": "^2.16.2",
+    "@types/bcryptjs": "^2.4.6",
     "@types/react": "^18.2.20",
     "@types/react-dom": "^18.2.7",
     "@typescript-eslint/eslint-plugin": "^6.7.4",
