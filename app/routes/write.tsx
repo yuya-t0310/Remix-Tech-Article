@@ -1,15 +1,24 @@
-import { ActionFunctionArgs } from "@remix-run/node";
+import { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
 import { Form, redirect } from "@remix-run/react";
 import prisma from "../../lib/prisma";
+import { requireUserSession } from "../data/auth.server";
 
+// ログイン状態でなければトップページへリダイレクト
+export const loader = async ({ request }: LoaderFunctionArgs) => {
+  await requireUserSession(request, "/");
+  return null;
+};
+
+// DBに登録
 export const action = async ({ request }: ActionFunctionArgs) => {
+  const userId = await requireUserSession(request, "/");
   const formData = await request.formData();
   const insert = Object.fromEntries(formData);
 
   await prisma.article.create({
     data: {
       title: insert.title as string,
-      author: insert.author as string,
+      authorId: parseInt(userId),
       content: insert.content as string,
       viewCount: 0,
     },
@@ -30,16 +39,7 @@ export default function WriteArticle() {
               type="text"
               aria-label="Title"
               placeholder="Title"
-            ></input>
-          </p>
-          <p>
-            <span>Author</span>
-            <input
-              name="author"
-              type="text"
-              aria-label="Author"
-              placeholder="Author"
-            ></input>
+            />
           </p>
           <p>
             <span>content</span>
@@ -50,7 +50,7 @@ export default function WriteArticle() {
             ></textarea>
           </p>
           <p>
-            <button type="submit">Publish Article</button>
+            <button type="submit">投稿</button>
           </p>
         </Form>
       </div>
