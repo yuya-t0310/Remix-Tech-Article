@@ -28,7 +28,7 @@ export const links: LinksFunction = () => [
 
 // export function Layout({ children }: { children: React.ReactNode }) {
 //   return (
-//     <html lang="en">
+//     <html lang="jp">
 //       <head>
 //         <meta charSet="utf-8" />
 //         <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -55,13 +55,19 @@ export default function App() {
 
   return (
     <html lang="jp">
-      <Header userId={userId} />
-      {/*その他の要素 */}
+      <head>
+        <meta charSet="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <Meta />
+        <Links />
+      </head>
       <body>
+        <Header userId={userId} />
         <div id="detail">
           <Outlet />
         </div>
-        {/*その他の要素 */}
+        <ScrollRestoration />
+        <Scripts />
       </body>
     </html>
   );
