@@ -5,9 +5,11 @@ import prisma from "../../lib/prisma";
 
 // サインアップ
 export async function signup({
+  userName,
   email,
   password,
 }: {
+  userName: string;
   email: string;
   password: string;
 }) {
@@ -24,9 +26,17 @@ export async function signup({
   // ユーザ登録
   const passwordHash = await hash(password, 12);
   const signUp = await prisma.user.create({
+    // Nested writesで子要素のProfileも同時に生成(トランザクション処理と同義となる)
     data: {
       email: email,
       password: passwordHash,
+      profile: {
+        create: {
+          name: userName,
+          bio: "",
+          // userIdは自動的にUserと関連付けられる
+        },
+      },
     },
   });
 
@@ -34,12 +44,17 @@ export async function signup({
     return null;
   }
   console.log("Signup sccessed!");
+
   const user = await prisma.user.findFirst({
     where: {
       email: email,
     },
   });
-  return user ? user : null;
+  if (!user) {
+    return null;
+  }
+
+  return user;
 }
 
 // ログインチェック

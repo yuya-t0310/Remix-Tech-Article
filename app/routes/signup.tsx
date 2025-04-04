@@ -26,6 +26,7 @@ export async function action({ request }: ActionFunctionArgs) {
 
   const formData = await request.formData();
   const signupData = Object.fromEntries(formData) as {
+    userName: string;
     email: string;
     password: string;
   };
@@ -62,6 +63,11 @@ export default function SignUp() {
         <div>
           <p>サインアップ</p>
         </div>
+        <p>
+          <label>
+            ユーザ名: <input type="text" name="userName" required />
+          </label>
+        </p>
         <p>
           <label>
             メールアドレス: <input type="email" name="email" required />
