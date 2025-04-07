@@ -1,8 +1,9 @@
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
-import { Form, useLoaderData } from "@remix-run/react";
+import { Form } from "@remix-run/react";
 import { redirect } from "@remix-run/node";
-import { getSession, commitSession } from "../sessions";
+import { getSession } from "../sessions";
 import { signup } from "../data/auth.server";
+import { setFlashMessage } from "../utils/session";
 
 // ログイン済であればホームページにリダイレクト
 export async function loader({ request }: LoaderFunctionArgs) {
@@ -12,13 +13,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
     return redirect("/");
   }
 
-  const data = { error: session.get("error") };
-
-  return Response.json(data, {
-    headers: {
-      "Set-Cookie": await commitSession(session),
-    },
-  });
+  return null;
 }
 
 export async function action({ request }: ActionFunctionArgs) {
@@ -36,33 +31,27 @@ export async function action({ request }: ActionFunctionArgs) {
   // TODO: メールアドレスが被った場合を切り分ける
   // サインアップ失敗
   if (user == null) {
-    session.flash("error", "サインアップに失敗しました。");
-    return redirect("/signup", {
-      headers: {
-        "Set-Cookie": await commitSession(session),
-      },
-    });
+    return setFlashMessage(
+      request,
+      { color: "error", message: "サインアップに失敗しました。" },
+      "/signup"
+    );
   }
 
   // サインアップ成功
   session.set("userId", String(user.id));
-  return redirect("/", {
-    headers: {
-      "Set-Cookie": await commitSession(session),
-    },
-  });
+  return setFlashMessage(
+    request,
+    { color: "success", message: "サインアップに成功しました。" },
+    "/"
+  );
 }
 
 export default function SignUp() {
-  const { error } = useLoaderData<typeof loader>();
-
   return (
     <div>
-      {error ? <div className="error">{error}</div> : null}
       <Form method="post">
-        <div>
-          <p>サインアップ</p>
-        </div>
+        <div className="text-xl font-bold">サインアップ</div>
         <p>
           <label>
             ユーザ名: <input type="text" name="userName" required />

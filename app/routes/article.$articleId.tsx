@@ -71,9 +71,7 @@ export default function Article() {
               action="destroy"
               method="post"
               onSubmit={(event) => {
-                const response = confirm(
-                  "Please confirm you want to delete this record."
-                );
+                const response = confirm("記事を削除します。よろしいですか?");
                 if (!response) {
                   event.preventDefault();
                 }
