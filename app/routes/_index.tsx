@@ -27,7 +27,7 @@ export default function Index() {
 
   return (
     <>
-      <div className="text-xl font-bold">TOP PAGE</div>
+      <div className="text-xl font-bold">トップページ</div>
 
       <div>
         <nav>
