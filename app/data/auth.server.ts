@@ -1,5 +1,5 @@
 import { redirect } from "@remix-run/node";
-import { getSession } from "../sessions";
+import { commitSession, getSession } from "../sessions";
 import { hash, compare } from "bcryptjs";
 import prisma from "../../lib/prisma";
 
@@ -96,10 +96,19 @@ export async function requireUserSession(
   request: Request,
   redirectPath: string
 ) {
+  const session = await getSession(request.headers.get("Cookie"));
   const userId = await getUserFromSession(request);
 
   if (!userId) {
-    throw redirect(redirectPath);
+    session.flash("flashMessage", {
+      color: "error",
+      message: "無効な操作です。",
+    });
+    throw redirect(redirectPath, {
+      headers: {
+        "Set-Cookie": await commitSession(session),
+      },
+    });
   }
 
   return userId;
@@ -110,7 +119,6 @@ export async function getUserFromSession(request: Request) {
   const session = await getSession(request.headers.get("Cookie"));
 
   const userId: string | undefined = session.get("userId");
-  console.log("userID:", userId);
 
   if (!userId) {
     return null;

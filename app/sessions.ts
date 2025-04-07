@@ -8,7 +8,10 @@ type SessionData = {
 };
 
 type SessionFlashData = {
-  error: string;
+  flashMessage: {
+    color: string;
+    message: string;
+  };
 };
 
 const { getSession, commitSession, destroySession } =
