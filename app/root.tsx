@@ -11,7 +11,8 @@ import type { LinksFunction, LoaderFunctionArgs } from "@remix-run/node";
 import Header from "./components/Header";
 
 import styles from "./tailwind.css?url";
-import { getSession } from "./sessions";
+import { getSession, commitSession } from "./sessions";
+import FlashMessage from "./components/FlashMessage";
 
 export const links: LinksFunction = () => [
   {
@@ -41,11 +42,21 @@ export const links: LinksFunction = () => [
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const session = await getSession(request.headers.get("Cookie"));
   const userId = session.get("userId");
-  return { userId };
+  const flashMessageData = session.get("flashMessage") || null;
+
+  return Response.json(
+    { userId, flashMessageData },
+    {
+      // 読み取り後のセッションに更新(flashの削除)
+      headers: {
+        "Set-Cookie": await commitSession(session),
+      },
+    }
+  );
 };
 
 export default function App() {
-  const { userId } = useLoaderData<typeof loader>();
+  const { userId, flashMessageData } = useLoaderData<typeof loader>();
 
   return (
     <html lang="jp">
@@ -57,6 +68,11 @@ export default function App() {
       </head>
       <body>
         <Header userId={userId} />
+        {flashMessageData ? (
+          <FlashMessage flashMessage={flashMessageData} />
+        ) : (
+          <></>
+        )}
         <div id="detail">
           <Outlet />
         </div>

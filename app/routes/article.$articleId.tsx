@@ -63,7 +63,7 @@ export default function Article() {
         <div>
           <div>
             <Form action="edit">
-              <button type="submit">Edit</button>
+              <button type="submit">編集</button>
             </Form>
           </div>
           <div>
@@ -71,15 +71,13 @@ export default function Article() {
               action="destroy"
               method="post"
               onSubmit={(event) => {
-                const response = confirm(
-                  "Please confirm you want to delete this record."
-                );
+                const response = confirm("記事を削除します。よろしいですか?");
                 if (!response) {
                   event.preventDefault();
                 }
               }}
             >
-              <button type="submit">Delete</button>
+              <button type="submit">削除</button>
             </Form>
           </div>
         </div>

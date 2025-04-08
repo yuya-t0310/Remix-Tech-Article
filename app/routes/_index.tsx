@@ -2,7 +2,7 @@ import { Link, useLoaderData } from "@remix-run/react";
 import prisma from "../../lib/prisma";
 
 export const loader = async () => {
-  // selectオプションを使用してパスワード等を取得しないようにする
+  // 最新記事取得 selectオプションを使用してパスワード等を取得しないようにする
   const latestArticles = await prisma.article.findMany({
     orderBy: { createdAt: "desc" },
     take: 10,
@@ -19,16 +19,16 @@ export const loader = async () => {
     },
   });
 
-  return Response.json({ latestArticles });
+  return { latestArticles };
 };
 
 export default function Index() {
   const { latestArticles } = useLoaderData<typeof loader>();
-  console.log(latestArticles);
 
   return (
     <>
-      <div>TOP PAGE</div>
+      <div className="text-xl font-bold">トップページ</div>
+
       <div>
         <nav>
           {latestArticles.length ? (

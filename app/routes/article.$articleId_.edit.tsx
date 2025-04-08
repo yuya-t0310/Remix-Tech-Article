@@ -3,6 +3,7 @@ import { Form, redirect, useLoaderData } from "@remix-run/react";
 import prisma from "../../lib/prisma";
 import invariant from "tiny-invariant";
 import { requireUserSession } from "../data/auth.server";
+import { setFlashMessage } from "../utils/session";
 
 export const loader = async ({ params, request }: LoaderFunctionArgs) => {
   // ログイン状態でなければトップページへリダイレクト
@@ -21,7 +22,11 @@ export const loader = async ({ params, request }: LoaderFunctionArgs) => {
 
   // 操作ユーザと著者ユーザが異なる場合トップページへリダイレクト
   if (parseInt(userId) != article.authorId) {
-    return redirect("/");
+    return setFlashMessage(
+      request,
+      { color: "error", message: "無効な操作です。" },
+      "/"
+    );
   }
 
   return Response.json({ article });
@@ -32,7 +37,7 @@ export const action = async ({ params, request }: ActionFunctionArgs) => {
   const formData = await request.formData();
   const update = Object.fromEntries(formData);
 
-  await prisma.article.update({
+  const article = await prisma.article.update({
     where: {
       id: parseInt(params.articleId),
     },
@@ -41,16 +46,23 @@ export const action = async ({ params, request }: ActionFunctionArgs) => {
       content: update.content as string,
     },
   });
-  return redirect(`/article/${params.articleId}`);
+
+  let message = { color: "success", message: "編集に成功しました。" };
+  // TODO: アプリケーションエラーになる
+  if (!article) {
+    message = { color: "error", message: "編集に失敗しました。" };
+  }
+
+  return setFlashMessage(request, message, `/article/${params.articleId}`);
 };
 
 export default function EditArticle() {
   const { article } = useLoaderData<typeof loader>();
-  console.log(article);
 
   return (
     <>
-      <div>Edit Article</div>
+      <div className="text-xl font-bold">記事編集</div>
+
       <div>
         <Form id="article-form" method="post">
           <p>

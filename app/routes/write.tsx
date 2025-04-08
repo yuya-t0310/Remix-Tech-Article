@@ -1,7 +1,8 @@
 import { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
-import { Form, redirect } from "@remix-run/react";
+import { Form } from "@remix-run/react";
 import prisma from "../../lib/prisma";
 import { requireUserSession } from "../data/auth.server";
+import { setFlashMessage } from "../utils/session";
 
 // ログイン状態でなければトップページへリダイレクト
 export const loader = async ({ request }: LoaderFunctionArgs) => {
@@ -15,7 +16,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   const formData = await request.formData();
   const insert = Object.fromEntries(formData);
 
-  await prisma.article.create({
+  const article = await prisma.article.create({
     data: {
       title: insert.title as string,
       authorId: parseInt(userId),
@@ -23,31 +24,34 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       viewCount: 0,
     },
   });
-  return redirect(`/`);
+
+  let message = { color: "success", message: "投稿に成功しました。" };
+  // TODO: アプリケーションエラーになる
+  if (!article) {
+    message = { color: "error", message: "投稿に失敗しました。" };
+  }
+
+  return setFlashMessage(request, message, "/");
 };
 
 export default function WriteArticle() {
   return (
     <>
-      <div>Create New Article</div>
+      <div className="text-xl font-bold">記事作成</div>
       <div>
         <Form id="article-form" method="post">
           <p>
-            <span>Title</span>
+            <span>タイトル</span>
             <input
               name="title"
               type="text"
               aria-label="Title"
-              placeholder="Title"
+              placeholder="タイトル"
             />
           </p>
           <p>
-            <span>content</span>
-            <textarea
-              name="content"
-              rows={12}
-              placeholder="Write your article..."
-            ></textarea>
+            <span>内容</span>
+            <textarea name="content" rows={12} placeholder="本文"></textarea>
           </p>
           <p>
             <button type="submit">投稿</button>

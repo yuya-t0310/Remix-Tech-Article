@@ -7,6 +7,7 @@ import { requireUserSession } from "../data/auth.server";
 import prisma from "../../lib/prisma";
 import { Form, useLoaderData } from "@remix-run/react";
 import { useState } from "react";
+import { setFlashMessage } from "../utils/session";
 
 export async function loader({ request }: LoaderFunctionArgs) {
   // ログイン状態でなければトップページへリダイレクト
@@ -39,8 +40,13 @@ export async function action({ request }: ActionFunctionArgs) {
 
   // formとセッションのuserIdが異なる場合トップページへリダイレクト
   if (userId != formUserId) {
-    return redirect("/");
+    return setFlashMessage(
+      request,
+      { color: "error", message: "無効な操作です。" },
+      "/"
+    );
   }
+
   const updateData = Object.fromEntries(formData) as {
     name: string;
     bio: string;
@@ -57,7 +63,13 @@ export async function action({ request }: ActionFunctionArgs) {
     },
   });
 
-  return redirect("/mypage");
+  let message = { color: "success", message: "保存に成功しました。" };
+  // TODO: アプリケーションエラーになる
+  if (!update) {
+    message = { color: "error", message: "保存に失敗しました。" };
+  }
+
+  return setFlashMessage(request, message, "/mypage");
 }
 
 export default function MyPage() {
@@ -68,9 +80,7 @@ export default function MyPage() {
 
   return (
     <>
-      <div>
-        <p>マイページ</p>
-      </div>
+      <div className="text-xl font-bold">マイページ</div>
       <div>
         {isEditing ? (
           <Form method="post" onSubmit={() => setIsEditing(false)}>

@@ -1,9 +1,10 @@
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node"; // または cloudflare/deno
 import { redirect } from "@remix-run/node"; // または cloudflare/deno
-import { Form, useLoaderData } from "@remix-run/react";
+import { Form } from "@remix-run/react";
 
 import { getSession, commitSession } from "../sessions";
 import { validateCredentials } from "../data/auth.server";
+import { setFlashMessage } from "../utils/session";
 
 // ログイン済であればホームページにリダイレクト
 export async function loader({ request }: LoaderFunctionArgs) {
@@ -13,13 +14,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
     return redirect("/");
   }
 
-  const data = { error: session.get("error") };
-
-  return Response.json(data, {
-    headers: {
-      "Set-Cookie": await commitSession(session),
-    },
-  });
+  return null;
 }
 
 export async function action({ request }: ActionFunctionArgs) {
@@ -35,12 +30,11 @@ export async function action({ request }: ActionFunctionArgs) {
 
   // ログイン失敗
   if (user == null) {
-    session.flash("error", "無効なユーザ名/パスワードです。");
-    return redirect("/login", {
-      headers: {
-        "Set-Cookie": await commitSession(session),
-      },
-    });
+    return setFlashMessage(
+      request,
+      { color: "error", message: "無効なユーザ名/パスワードです。" },
+      "/login"
+    );
   }
 
   // ログイン成功
@@ -53,29 +47,29 @@ export async function action({ request }: ActionFunctionArgs) {
 }
 
 export default function Login() {
-  const { error } = useLoaderData<typeof loader>();
-
   return (
-    <div>
-      {error ? <div className="error">{error}</div> : null}
-      <Form method="post">
-        <div>
-          <p>ログイン</p>
-        </div>
-        <p>
-          <label>
-            メールアドレス: <input type="email" name="email" required />
-          </label>
-        </p>
-        <p>
-          <label>
-            パスワード: <input type="password" name="password" />
-          </label>
-        </p>
-        <div>
-          <button> ログイン </button>
-        </div>
-      </Form>
-    </div>
+    <>
+      <div className="text-xl font-bold">ログイン</div>
+      <div>
+        <Form method="post">
+          <div>
+            <p>ログイン</p>
+          </div>
+          <p>
+            <label>
+              メールアドレス: <input type="email" name="email" required />
+            </label>
+          </p>
+          <p>
+            <label>
+              パスワード: <input type="password" name="password" />
+            </label>
+          </p>
+          <div>
+            <button> ログイン </button>
+          </div>
+        </Form>
+      </div>
+    </>
   );
 }
