@@ -1,9 +1,10 @@
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node"; // または cloudflare/deno
 import { redirect } from "@remix-run/node"; // または cloudflare/deno
-import { Form, useLoaderData } from "@remix-run/react";
+import { Form } from "@remix-run/react";
 
 import { getSession, commitSession } from "../sessions";
 import { validateCredentials } from "../data/auth.server";
+import { setFlashMessage } from "../utils/session";
 
 // ログイン済であればホームページにリダイレクト
 export async function loader({ request }: LoaderFunctionArgs) {
@@ -29,15 +30,11 @@ export async function action({ request }: ActionFunctionArgs) {
 
   // ログイン失敗
   if (user == null) {
-    session.flash("flashMessage", {
-      color: "error",
-      message: "無効なユーザ名/パスワードです。",
-    });
-    return redirect("/login", {
-      headers: {
-        "Set-Cookie": await commitSession(session),
-      },
-    });
+    return setFlashMessage(
+      request,
+      { color: "error", message: "無効なユーザ名/パスワードです。" },
+      "/login"
+    );
   }
 
   // ログイン成功
