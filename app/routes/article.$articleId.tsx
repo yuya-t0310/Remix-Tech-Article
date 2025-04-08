@@ -1,12 +1,20 @@
-import { LoaderFunctionArgs } from "@remix-run/node";
+import {
+  ActionFunctionArgs,
+  LoaderFunctionArgs,
+  redirect,
+} from "@remix-run/node";
 import prisma from "../../lib/prisma";
 import invariant from "tiny-invariant";
 import { Form, useLoaderData } from "@remix-run/react";
-import { getUserFromSession } from "../data/auth.server";
+import { getUserFromSession, requireUserSession } from "../data/auth.server";
+import Favorite from "../components/Favorite";
+import { setFlashMessage } from "../utils/session";
 
 export const loader = async ({ params, request }: LoaderFunctionArgs) => {
   // セッションからuserId取得
   const userId = await getUserFromSession(request);
+  let isFavorite: boolean = false;
+
   // article.$articleId.tsx → $xxxをparam.xxxで取得できる
   invariant(params.articleId, "Missing articleId param");
   const article = await prisma.article.findFirst({
@@ -23,6 +31,7 @@ export const loader = async ({ params, request }: LoaderFunctionArgs) => {
           },
         },
       },
+      favoritedBy: {},
     },
   });
 
@@ -30,26 +39,67 @@ export const loader = async ({ params, request }: LoaderFunctionArgs) => {
     throw new Response("Not Found", { status: 404 });
   }
 
-  // viewCountをインクリメント
-  await prisma.article.update({
-    where: {
-      id: parseInt(params.articleId),
-    },
-    data: {
-      viewCount: {
-        increment: 1,
+  // ログイン済みの場合お気に入り登録した記事であるか確認
+  if (userId) {
+    const favorite = await prisma.favorite.findFirst({
+      where: {
+        userId: parseInt(userId),
+        articleId: parseInt(params.articleId),
       },
-      // 現在の値を設定
-      updatedAt: article.updatedAt,
-    },
-  });
+    });
+    if (favorite) {
+      isFavorite = true;
+    }
+  }
 
-  return Response.json({ article, userId });
+  // リファラー(どのページからアクセスしたか)をチェックしてviewCountをインクリメント
+  // 現在のページのURLを含んでいる場合はインクリメントしない
+  // TODO: 初回のお気に入り登録・解除のみインクリメントされてしまう
+  const referer = request.headers.get("Referer");
+  console.log(referer);
+  if (!referer || !referer.includes(request.url)) {
+    await prisma.article.update({
+      where: {
+        id: parseInt(params.articleId),
+      },
+      data: {
+        viewCount: {
+          increment: 1,
+        },
+        // 現在の値を設定
+        updatedAt: article.updatedAt,
+      },
+    });
+  }
+
+  return Response.json({ article, userId, isFavorite });
+};
+
+export const action = async ({ params, request }: ActionFunctionArgs) => {
+  const userId = await requireUserSession(request, "/");
+  invariant(params.articleId, "Missing articleId param");
+
+  const formData = await request.formData();
+  const favorite = formData.get("favorite");
+
+  const actionFavorite =
+    favorite === "true"
+      ? addFavorite({ userId: userId, articleId: params.articleId })
+      : removeFavorite({ userId: userId, articleId: params.articleId });
+
+  if (!actionFavorite) {
+    setFlashMessage(
+      request,
+      { color: "error", message: "処理に失敗しました。" },
+      `/article/${params.articleId}`
+    );
+  }
+
+  return redirect(`/article/${params.articleId}`);
 };
 
 export default function Article() {
-  const { article, userId } = useLoaderData<typeof loader>();
-  console.log(userId);
+  const { article, userId, isFavorite } = useLoaderData<typeof loader>();
 
   return (
     <>
@@ -59,6 +109,7 @@ export default function Article() {
         <div>コンテンツ {article.content}</div>
         <div>閲覧数 {article.viewCount}</div>
       </div>
+      {userId ? <Favorite isFavorite={isFavorite} /> : <></>}
       {userId == article.authorId ? (
         <div>
           <div>
@@ -86,4 +137,38 @@ export default function Article() {
       )}
     </>
   );
+}
+
+// 記事をお気に入り登録
+async function addFavorite({
+  userId,
+  articleId,
+}: {
+  userId: string;
+  articleId: string;
+}) {
+  return await prisma.favorite.create({
+    data: {
+      userId: parseInt(userId),
+      articleId: parseInt(articleId),
+    },
+  });
+}
+
+// 記事のお気に入り登録を解除
+async function removeFavorite({
+  userId,
+  articleId,
+}: {
+  userId: string;
+  articleId: string;
+}) {
+  return await prisma.favorite.delete({
+    where: {
+      favoriteId: {
+        userId: parseInt(userId),
+        articleId: parseInt(articleId),
+      },
+    },
+  });
 }
