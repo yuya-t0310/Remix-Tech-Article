@@ -51,5 +51,5 @@ model Favorite {
   user      User    @relation(fields: [userId], references: [id])
   article   Article @relation(fields: [articleId], references: [id])
 
-  @@unique([userId, articleId])
+  @@unique([userId, articleId], name: "favoriteId")
 }
