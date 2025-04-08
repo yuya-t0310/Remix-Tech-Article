@@ -7,7 +7,7 @@ import { requireUserSession } from "../data/auth.server";
 import prisma from "../../lib/prisma";
 import { Form, useLoaderData } from "@remix-run/react";
 import { useState } from "react";
-import { setFlashMessage } from "~/utils/session";
+import { setFlashMessage } from "../utils/session";
 
 export async function loader({ request }: LoaderFunctionArgs) {
   // ログイン状態でなければトップページへリダイレクト

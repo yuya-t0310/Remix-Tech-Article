@@ -63,7 +63,7 @@ export default function Article() {
         <div>
           <div>
             <Form action="edit">
-              <button type="submit">Edit</button>
+              <button type="submit">編集</button>
             </Form>
           </div>
           <div>
@@ -77,7 +77,7 @@ export default function Article() {
                 }
               }}
             >
-              <button type="submit">Delete</button>
+              <button type="submit">削除</button>
             </Form>
           </div>
         </div>
