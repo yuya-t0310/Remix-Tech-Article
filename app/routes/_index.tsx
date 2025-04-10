@@ -1,5 +1,6 @@
-import { Link, useLoaderData } from "@remix-run/react";
+import { useLoaderData } from "@remix-run/react";
 import prisma from "../../lib/prisma";
+import ArticleCard from "../components/ArticleCard";
 
 export const loader = async () => {
   // 最新記事取得 selectオプションを使用してパスワード等を取得しないようにする
@@ -16,6 +17,7 @@ export const loader = async () => {
           },
         },
       },
+      favoritedBy: {},
     },
   });
 
@@ -27,21 +29,18 @@ export default function Index() {
 
   return (
     <>
-      <div className="text-xl font-bold">トップページ</div>
+      <div className="text-xl font-bold m-4">最新記事一覧</div>
 
-      <div>
+      <div className="ml-8">
         <nav>
           {latestArticles.length ? (
             <ul>
               {latestArticles.map((article) => {
+                console.log(article);
                 return (
-                  <li key={article.id}>
-                    <Link to={`article/${article.id}`}>
-                      <>
-                        {article.title} {article.author.profile?.name}
-                      </>
-                    </Link>
-                  </li>
+                  <div key={article.id}>
+                    <ArticleCard article={article} />
+                  </div>
                 );
               })}
             </ul>
