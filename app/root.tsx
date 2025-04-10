@@ -66,7 +66,7 @@ export default function App() {
         <Meta />
         <Links />
       </head>
-      <body>
+      <body className="bg-[#7ec7d8]/25">
         <Header userId={userId} />
         {flashMessageData ? (
           <FlashMessage flashMessage={flashMessageData} />
