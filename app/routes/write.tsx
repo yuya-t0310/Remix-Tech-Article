@@ -2,7 +2,7 @@ import { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
 import prisma from "../../lib/prisma";
 import { requireUserSession } from "../data/auth.server";
 import { setFlashMessage } from "../utils/session";
-import ArticleForm from "../components/ArticleEditor";
+import ArticleForm from "../components/ArticleForm";
 
 // ログイン状態でなければトップページへリダイレクト
 export const loader = async ({ request }: LoaderFunctionArgs) => {
@@ -39,7 +39,7 @@ export default function WriteArticle() {
     <>
       <div className="text-xl font-bold">記事作成</div>
       <div className="m-4">
-        <ArticleForm />
+        <ArticleForm article={null} />
       </div>
     </>
   );
