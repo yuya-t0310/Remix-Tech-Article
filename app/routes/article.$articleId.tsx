@@ -5,10 +5,13 @@ import {
 } from "@remix-run/node";
 import prisma from "../../lib/prisma";
 import invariant from "tiny-invariant";
-import { Form, useLoaderData } from "@remix-run/react";
+import { useLoaderData } from "@remix-run/react";
 import { getUserFromSession, requireUserSession } from "../data/auth.server";
 import Favorite from "../components/Favorite";
 import { setFlashMessage } from "../utils/session";
+import ArticleViewerTitle from "../components/ArticleViewerTitle";
+import ArticleViewerContent from "../components/ArticleViewerContent";
+import EditButtons from "../components/EditButtons";
 
 export const loader = async ({ params, request }: LoaderFunctionArgs) => {
   // セッションからuserId取得
@@ -72,7 +75,7 @@ export const loader = async ({ params, request }: LoaderFunctionArgs) => {
     });
   }
 
-  return Response.json({ article, userId, isFavorite });
+  return { article, userId, isFavorite };
 };
 
 export const action = async ({ params, request }: ActionFunctionArgs) => {
@@ -103,38 +106,24 @@ export default function Article() {
 
   return (
     <>
-      <div id="article">
-        <div>タイトル {article.title}</div>
-        <div>著者 {article.author.profile?.name}</div>
-        <div>コンテンツ {article.content}</div>
-        <div>閲覧数 {article.viewCount}</div>
+      <div className="m-4">
+        <ArticleViewerTitle article={article} />
+        {userId ? (
+          <Favorite isFavorite={isFavorite} article={article} />
+        ) : (
+          <></>
+        )}
+        <ArticleViewerContent article={article} />
+        {userId ? (
+          parseInt(userId) == article.authorId ? (
+            <EditButtons />
+          ) : (
+            <></>
+          )
+        ) : (
+          <></>
+        )}
       </div>
-      {userId ? <Favorite isFavorite={isFavorite} /> : <></>}
-      {userId == article.authorId ? (
-        <div>
-          <div>
-            <Form action="edit">
-              <button type="submit">編集</button>
-            </Form>
-          </div>
-          <div>
-            <Form
-              action="destroy"
-              method="post"
-              onSubmit={(event) => {
-                const response = confirm("記事を削除します。よろしいですか?");
-                if (!response) {
-                  event.preventDefault();
-                }
-              }}
-            >
-              <button type="submit">削除</button>
-            </Form>
-          </div>
-        </div>
-      ) : (
-        <></>
-      )}
     </>
   );
 }

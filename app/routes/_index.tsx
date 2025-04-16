@@ -36,7 +36,6 @@ export default function Index() {
           {latestArticles.length ? (
             <ul>
               {latestArticles.map((article) => {
-                console.log(article);
                 return (
                   <div key={article.id}>
                     <ArticleCard article={article} />
