@@ -29,14 +29,13 @@ export default function Index() {
 
   return (
     <>
-      <div className="text-xl font-bold m-4">最新記事一覧</div>
+      <div className="text-xl font-bold">最新記事一覧</div>
 
-      <div className="ml-8">
+      <div className="m-4">
         <nav>
           {latestArticles.length ? (
             <ul>
               {latestArticles.map((article) => {
-                console.log(article);
                 return (
                   <div key={article.id}>
                     <ArticleCard article={article} />

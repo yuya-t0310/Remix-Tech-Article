@@ -1,9 +1,10 @@
 import { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
-import { Form, redirect, useLoaderData } from "@remix-run/react";
+import { useLoaderData } from "@remix-run/react";
 import prisma from "../../lib/prisma";
 import invariant from "tiny-invariant";
 import { requireUserSession } from "../data/auth.server";
 import { setFlashMessage } from "../utils/session";
+import ArticleForm from "../components/ArticleForm";
 
 export const loader = async ({ params, request }: LoaderFunctionArgs) => {
   // ログイン状態でなければトップページへリダイレクト
@@ -29,7 +30,7 @@ export const loader = async ({ params, request }: LoaderFunctionArgs) => {
     );
   }
 
-  return Response.json({ article });
+  return { article };
 };
 
 export const action = async ({ params, request }: ActionFunctionArgs) => {
@@ -63,31 +64,8 @@ export default function EditArticle() {
     <>
       <div className="text-xl font-bold">記事編集</div>
 
-      <div>
-        <Form id="article-form" method="post">
-          <p>
-            <span>Title</span>
-            <input
-              name="title"
-              type="text"
-              aria-label="Title"
-              placeholder="Title"
-              defaultValue={article.title}
-            ></input>
-          </p>
-          <p>
-            <span>content</span>
-            <textarea
-              name="content"
-              rows={12}
-              placeholder="Write your article..."
-              defaultValue={article.content}
-            ></textarea>
-          </p>
-          <p>
-            <button type="submit">Update</button>
-          </p>
-        </Form>
+      <div className="m-4">
+        <ArticleForm article={article} />
       </div>
     </>
   );

@@ -73,7 +73,7 @@ export default function App() {
         ) : (
           <></>
         )}
-        <div id="detail">
+        <div id="detail" className="m-4">
           <Outlet />
         </div>
         <ScrollRestoration />
