@@ -24,11 +24,21 @@ npx prisma
 npx prisma init
 npx prisma migrate dev --name add_article_model
 
+# tailwindcss
+npm i --save-dev @tailwindcss/typography
+
 # invariant
 npm i tiny-invariant
+
 # bycript
 npm i bcryptjs
 npm i -D @types/bcryptjs
+
+# markdown
+npm install react-markdown
+npm install remark-gfm
+npm install rehype-raw
+npm i --save-dev @types/markdown-it
 ```
 
 # 予定機能
