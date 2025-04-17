@@ -3,7 +3,6 @@ import {
   LoaderFunctionArgs,
   redirect,
 } from "@remix-run/node";
-import prisma from "../../db/prisma";
 import invariant from "tiny-invariant";
 import { useLoaderData } from "@remix-run/react";
 import { getUserFromSession, requireUserSession } from "../data/auth.server";
@@ -13,6 +12,11 @@ import ArticleViewerTitle from "../components/ArticleViewerTitle";
 import ArticleViewerContent from "../components/ArticleViewerContent";
 import EditBtn from "../components/EditBtn";
 import DeleteBtn from "../components/DeleteBtn";
+import {
+  findArticleDetailById,
+  incrementArticleViewCount,
+} from "../db/article";
+import { findFavorite, addFavorite, removeFavorite } from "../db/favorite";
 
 export const loader = async ({ params, request }: LoaderFunctionArgs) => {
   // セッションからuserId取得
@@ -21,23 +25,7 @@ export const loader = async ({ params, request }: LoaderFunctionArgs) => {
 
   // article.$articleId.tsx → $xxxをparam.xxxで取得できる
   invariant(params.articleId, "Missing articleId param");
-  const article = await prisma.article.findFirst({
-    where: {
-      id: parseInt(params.articleId),
-    },
-    include: {
-      author: {
-        select: {
-          profile: {
-            select: {
-              name: true,
-            },
-          },
-        },
-      },
-      favoritedBy: {},
-    },
-  });
+  const article = await findArticleDetailById(parseInt(params.articleId));
 
   if (!article) {
     throw new Response("Not Found", { status: 404 });
@@ -45,12 +33,10 @@ export const loader = async ({ params, request }: LoaderFunctionArgs) => {
 
   // ログイン済みの場合お気に入り登録した記事であるか確認
   if (userId) {
-    const favorite = await prisma.favorite.findFirst({
-      where: {
-        userId: parseInt(userId),
-        articleId: parseInt(params.articleId),
-      },
-    });
+    const favorite = await findFavorite(
+      parseInt(userId),
+      parseInt(params.articleId)
+    );
     if (favorite) {
       isFavorite = true;
     }
@@ -62,18 +48,10 @@ export const loader = async ({ params, request }: LoaderFunctionArgs) => {
   const referer = request.headers.get("Referer");
   console.log(referer);
   if (!referer || !referer.includes(request.url)) {
-    await prisma.article.update({
-      where: {
-        id: parseInt(params.articleId),
-      },
-      data: {
-        viewCount: {
-          increment: 1,
-        },
-        // 現在の値を設定
-        updatedAt: article.updatedAt,
-      },
-    });
+    await incrementArticleViewCount(
+      parseInt(params.articleId),
+      article.updatedAt
+    );
   }
 
   return { article, userId, isFavorite };
@@ -88,8 +66,8 @@ export const action = async ({ params, request }: ActionFunctionArgs) => {
 
   const actionFavorite =
     favorite === "true"
-      ? addFavorite({ userId: userId, articleId: params.articleId })
-      : removeFavorite({ userId: userId, articleId: params.articleId });
+      ? addFavorite(parseInt(userId), parseInt(params.articleId))
+      : removeFavorite(parseInt(userId), parseInt(params.articleId));
 
   if (!actionFavorite) {
     setFlashMessage(
@@ -130,38 +108,4 @@ export default function Article() {
       </div>
     </>
   );
-}
-
-// 記事をお気に入り登録
-async function addFavorite({
-  userId,
-  articleId,
-}: {
-  userId: string;
-  articleId: string;
-}) {
-  return await prisma.favorite.create({
-    data: {
-      userId: parseInt(userId),
-      articleId: parseInt(articleId),
-    },
-  });
-}
-
-// 記事のお気に入り登録を解除
-async function removeFavorite({
-  userId,
-  articleId,
-}: {
-  userId: string;
-  articleId: string;
-}) {
-  return await prisma.favorite.delete({
-    where: {
-      favoriteId: {
-        userId: parseInt(userId),
-        articleId: parseInt(articleId),
-      },
-    },
-  });
 }
