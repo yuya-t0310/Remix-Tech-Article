@@ -37,7 +37,7 @@ export default function Index() {
             <ul>
               {latestArticles.map((article) => {
                 return (
-                  <div key={article.id}>
+                  <div key={article.id} className="m-2">
                     <ArticleCard article={article} />
                   </div>
                 );

@@ -11,6 +11,7 @@
     "typecheck": "tsc"
   },
   "dependencies": {
+    "@egoist/tailwindcss-icons": "^1.9.0",
     "@prisma/client": "^6.5.0",
     "@remix-run/express": "^2.16.2",
     "@remix-run/node": "^2.16.2",
@@ -27,6 +28,8 @@
     "tiny-invariant": "^1.3.3"
   },
   "devDependencies": {
+    "@iconify-json/iconoir": "^1.2.7",
+    "@iconify/json": "^2.2.328",
     "@remix-run/dev": "^2.16.2",
     "@tailwindcss/typography": "^0.5.16",
     "@types/bcryptjs": "^2.4.6",
