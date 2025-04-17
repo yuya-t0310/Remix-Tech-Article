@@ -11,7 +11,8 @@ import Favorite from "../components/Favorite";
 import { setFlashMessage } from "../utils/session";
 import ArticleViewerTitle from "../components/ArticleViewerTitle";
 import ArticleViewerContent from "../components/ArticleViewerContent";
-import EditButtons from "../components/EditButtons";
+import EditBtn from "../components/EditBtn";
+import DeleteBtn from "../components/DeleteBtn";
 
 export const loader = async ({ params, request }: LoaderFunctionArgs) => {
   // セッションからuserId取得
@@ -116,7 +117,10 @@ export default function Article() {
         <ArticleViewerContent article={article} />
         {userId ? (
           parseInt(userId) == article.authorId ? (
-            <EditButtons />
+            <div className="flex justify-between">
+              <EditBtn />
+              <DeleteBtn confirmMsg={"記事を削除します。よろしいですか？"} />
+            </div>
           ) : (
             <></>
           )
