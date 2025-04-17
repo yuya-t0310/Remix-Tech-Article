@@ -107,7 +107,7 @@ export default function MyPage() {
             <div>
               {myArticle.map((article) => {
                 return (
-                  <div key={article.id}>
+                  <div key={article.id} className="m-2">
                     <ArticleCard article={article}></ArticleCard>
                   </div>
                 );
