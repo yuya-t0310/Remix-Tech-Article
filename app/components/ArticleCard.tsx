@@ -16,13 +16,13 @@ type Article = {
 export default function ArticleCard({ article }: { article: Article }) {
   return (
     <>
-      <div className="shadow-md max-w-96 p-4 m-2 bg-[#7ec7d8]/25">
+      <div className="shadow-md max-w-96 p-4 bg-[#7ec7d8]/25">
         <Link to={`/article/${article.id}`}>
           <div className="text-xl line-clamp-1 hover:underline underline-offset-1 decoration-2">
             {article.title}
           </div>
         </Link>
-        <div className="space-x-4">
+        <div className="space-x-4 flex items-center">
           <span className="text-sm font-light hover:underline underline-offset-1 decoration-1">
             {article.author.profile?.name}
           </span>
@@ -31,6 +31,10 @@ export default function ArticleCard({ article }: { article: Article }) {
           </span>
           <span className="text-xs font-thin">
             ☆ {article.favoritedBy.length}
+          </span>
+          <span className="space-x-1 flex items-center font-thin">
+            <span className="i-iconoir-eye">{article.viewCount}</span>
+            <span className="text-xs">{article.viewCount}</span>
           </span>
         </div>
       </div>
