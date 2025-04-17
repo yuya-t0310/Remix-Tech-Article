@@ -16,8 +16,8 @@ type Article = {
 export default function ArticleCard({ article }: { article: Article }) {
   return (
     <>
-      <div className="shadow-md max-w-96 p-4 m-2 bg-[#7ec7d8]/50">
-        <Link to={`article/${article.id}`}>
+      <div className="shadow-md max-w-96 p-4 m-2 bg-[#7ec7d8]/25">
+        <Link to={`/article/${article.id}`}>
           <div className="text-xl line-clamp-1 hover:underline underline-offset-1 decoration-2">
             {article.title}
           </div>
