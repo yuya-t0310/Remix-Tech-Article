@@ -26,6 +26,9 @@ npx prisma migrate dev --name add_article_model
 
 # tailwindcss
 npm i --save-dev @tailwindcss/typography
+npm add @egoist/tailwindcss-icons
+npm add -D @iconify/json
+npm i -D @iconify-json/iconoir   
 
 # invariant
 npm i tiny-invariant
