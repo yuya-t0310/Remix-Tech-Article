@@ -1,48 +1,26 @@
 import { LoaderFunctionArgs, ActionFunctionArgs } from "@remix-run/node";
 import { requireUserSession } from "../data/auth.server";
-import prisma from "../../db/prisma";
 import { useLoaderData } from "@remix-run/react";
 import { setFlashMessage } from "../utils/session";
 import MypageViewer from "../components/MypageViewer";
-import ArticleCard from "~/components/ArticleCard";
+import ArticleCard from "../components/ArticleCard";
+import { createProfile, findProfile, updateProfile } from "../db/profile";
+import { findArticleByAuthorId } from "../db/article";
 
 export async function loader({ request }: LoaderFunctionArgs) {
   // ログイン状態でなければトップページへリダイレクト
   const userId = await requireUserSession(request, "/");
-  let profile = await prisma.profile.findFirst({
-    where: {
-      userId: parseInt(userId),
-    },
-  });
+
+  // profile取得
+  let profile = await findProfile(parseInt(userId));
 
   // profileが存在しなかった場合は新規作成する
   if (!profile) {
-    profile = await prisma.profile.create({
-      data: {
-        name: "",
-        bio: "",
-        userId: parseInt(userId),
-      },
-    });
+    profile = await createProfile(parseInt(userId));
   }
 
   // 自分が作成した記事を取得
-  const myArticle = await prisma.article.findMany({
-    where: { authorId: parseInt(userId) },
-    orderBy: { createdAt: "desc" },
-    include: {
-      author: {
-        select: {
-          profile: {
-            select: {
-              name: true,
-            },
-          },
-        },
-      },
-      favoritedBy: {},
-    },
-  });
+  const myArticle = await findArticleByAuthorId(parseInt(userId));
 
   return { userId, profile, myArticle };
 }
@@ -69,15 +47,11 @@ export async function action({ request }: ActionFunctionArgs) {
   };
 
   // 保存処理
-  const update = await prisma.profile.update({
-    where: {
-      userId: parseInt(userId),
-    },
-    data: {
-      name: updateData.name,
-      bio: updateData.bio,
-    },
-  });
+  const update = await updateProfile(
+    parseInt(userId),
+    updateData.name,
+    updateData.bio
+  );
 
   let message = { color: "success", message: "保存に成功しました。" };
   // TODO: アプリケーションエラーになる

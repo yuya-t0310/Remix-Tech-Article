@@ -1,7 +1,7 @@
 import { redirect } from "@remix-run/node";
 import { commitSession, getSession } from "../sessions";
 import { hash, compare } from "bcryptjs";
-import prisma from "../../db/prisma";
+import prisma from "../db/prisma";
 
 // サインアップ
 export async function signup({
