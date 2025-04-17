@@ -1,13 +1,9 @@
-import {
-  LoaderFunctionArgs,
-  ActionFunctionArgs,
-  redirect,
-} from "@remix-run/node";
+import { LoaderFunctionArgs, ActionFunctionArgs } from "@remix-run/node";
 import { requireUserSession } from "../data/auth.server";
 import prisma from "../../lib/prisma";
-import { Form, useLoaderData } from "@remix-run/react";
-import { useState } from "react";
+import { useLoaderData } from "@remix-run/react";
 import { setFlashMessage } from "../utils/session";
+import MypageViewer from "../components/MypageViewer";
 
 export async function loader({ request }: LoaderFunctionArgs) {
   // ログイン状態でなければトップページへリダイレクト
@@ -74,49 +70,12 @@ export async function action({ request }: ActionFunctionArgs) {
 
 export default function MyPage() {
   const { userId, profile } = useLoaderData<typeof loader>();
-  const [isEditing, setIsEditing] = useState(false);
-  const [name, setName] = useState(profile.name);
-  const [bio, setBio] = useState(profile.bio);
 
   return (
     <>
       <div className="text-xl font-bold">マイページ</div>
-      <div>
-        {isEditing ? (
-          <Form method="post" onSubmit={() => setIsEditing(false)}>
-            <p>
-              ユーザ名:{" "}
-              <input
-                type="text"
-                name="name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-              />
-            </p>
-            <p>
-              bio:{" "}
-              <textarea
-                name="bio"
-                value={bio ? bio : ""}
-                onChange={(e) => setBio(e.target.value)}
-              />
-            </p>
-            <input type="hidden" name="userId" value={userId} />
-            <div>
-              <button type="submit">保存</button>
-            </div>
-          </Form>
-        ) : (
-          <>
-            <div>
-              <p>ユーザ名: {profile.name}</p>
-              <p>bio: {profile.bio}</p>
-            </div>
-            <div>
-              <button onClick={() => setIsEditing(true)}> 編集 </button>
-            </div>
-          </>
-        )}
+      <div className="m-4">
+        <MypageViewer profile={profile} userId={userId} />
       </div>
     </>
   );
