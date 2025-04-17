@@ -1,5 +1,5 @@
 import { useLoaderData } from "@remix-run/react";
-import prisma from "../../lib/prisma";
+import prisma from "../../db/prisma";
 import ArticleCard from "../components/ArticleCard";
 
 export const loader = async () => {

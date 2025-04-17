@@ -1,6 +1,6 @@
 import { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
-import prisma from "../../lib/prisma";
+import prisma from "../../db/prisma";
 import invariant from "tiny-invariant";
 import { requireUserSession } from "../data/auth.server";
 import { setFlashMessage } from "../utils/session";

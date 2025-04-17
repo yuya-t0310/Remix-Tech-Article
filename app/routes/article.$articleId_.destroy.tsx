@@ -1,5 +1,5 @@
 import { ActionFunctionArgs } from "@remix-run/node";
-import prisma from "../../lib/prisma";
+import prisma from "../../db/prisma";
 import invariant from "tiny-invariant";
 import { LoaderFunctionArgs, redirect } from "react-router";
 import { requireUserSession } from "../data/auth.server";

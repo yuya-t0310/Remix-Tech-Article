@@ -1,6 +1,6 @@
 import { LoaderFunctionArgs, ActionFunctionArgs } from "@remix-run/node";
 import { requireUserSession } from "../data/auth.server";
-import prisma from "../../lib/prisma";
+import prisma from "../../db/prisma";
 import { useLoaderData } from "@remix-run/react";
 import { setFlashMessage } from "../utils/session";
 import MypageViewer from "../components/MypageViewer";

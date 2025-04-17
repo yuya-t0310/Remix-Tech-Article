@@ -3,7 +3,7 @@ import {
   LoaderFunctionArgs,
   redirect,
 } from "@remix-run/node";
-import prisma from "../../lib/prisma";
+import prisma from "../../db/prisma";
 import invariant from "tiny-invariant";
 import { useLoaderData } from "@remix-run/react";
 import { getUserFromSession, requireUserSession } from "../data/auth.server";

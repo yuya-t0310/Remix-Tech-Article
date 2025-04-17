@@ -1,5 +1,5 @@
 import { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
-import prisma from "../../lib/prisma";
+import prisma from "../../db/prisma";
 import { requireUserSession } from "../data/auth.server";
 import { setFlashMessage } from "../utils/session";
 import ArticleForm from "../components/ArticleForm";
