@@ -117,7 +117,7 @@ export default function Article() {
         <ArticleViewerContent article={article} />
         {userId ? (
           parseInt(userId) == article.authorId ? (
-            <div className="flex justify-between">
+            <div className="m-2 flex justify-between">
               <EditBtn />
               <DeleteBtn confirmMsg={"記事を削除します。よろしいですか？"} />
             </div>

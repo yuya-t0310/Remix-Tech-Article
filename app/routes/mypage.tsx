@@ -4,6 +4,7 @@ import prisma from "../../lib/prisma";
 import { useLoaderData } from "@remix-run/react";
 import { setFlashMessage } from "../utils/session";
 import MypageViewer from "../components/MypageViewer";
+import ArticleCard from "~/components/ArticleCard";
 
 export async function loader({ request }: LoaderFunctionArgs) {
   // ログイン状態でなければトップページへリダイレクト
@@ -24,7 +25,26 @@ export async function loader({ request }: LoaderFunctionArgs) {
       },
     });
   }
-  return { userId, profile };
+
+  // 自分が作成した記事を取得
+  const myArticle = await prisma.article.findMany({
+    where: { authorId: parseInt(userId) },
+    orderBy: { createdAt: "desc" },
+    include: {
+      author: {
+        select: {
+          profile: {
+            select: {
+              name: true,
+            },
+          },
+        },
+      },
+      favoritedBy: {},
+    },
+  });
+
+  return { userId, profile, myArticle };
 }
 
 export async function action({ request }: ActionFunctionArgs) {
@@ -69,13 +89,34 @@ export async function action({ request }: ActionFunctionArgs) {
 }
 
 export default function MyPage() {
-  const { userId, profile } = useLoaderData<typeof loader>();
+  const { userId, profile, myArticle } = useLoaderData<typeof loader>();
 
   return (
     <>
       <div className="text-xl font-bold">マイページ</div>
+
       <div className="m-4">
         <MypageViewer profile={profile} userId={userId} />
+      </div>
+
+      <div className="m-6">
+        <span className="font-light">投稿記事一覧</span>
+
+        <div className="m-4">
+          {myArticle.length > 0 ? (
+            <div>
+              {myArticle.map((article) => {
+                return (
+                  <div key={article.id}>
+                    <ArticleCard article={article}></ArticleCard>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="font-thin">投稿記事はありません。</div>
+          )}
+        </div>
       </div>
     </>
   );
