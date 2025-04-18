@@ -1,8 +1,8 @@
 import { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
-import prisma from "../../lib/prisma";
 import { requireUserSession } from "../data/auth.server";
 import { setFlashMessage } from "../utils/session";
 import ArticleForm from "../components/ArticleForm";
+import { createArticle } from "../db/article";
 
 // ログイン状態でなければトップページへリダイレクト
 export const loader = async ({ request }: LoaderFunctionArgs) => {
@@ -16,14 +16,11 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   const formData = await request.formData();
   const insert = Object.fromEntries(formData);
 
-  const article = await prisma.article.create({
-    data: {
-      title: insert.title as string,
-      authorId: parseInt(userId),
-      content: insert.content as string,
-      viewCount: 0,
-    },
-  });
+  const article = await createArticle(
+    insert.title as string,
+    parseInt(userId),
+    insert.content as string
+  );
 
   let message = { color: "success", message: "投稿に成功しました。" };
   // TODO: アプリケーションエラーになる

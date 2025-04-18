@@ -1,7 +1,7 @@
 import { redirect } from "@remix-run/node";
 import { commitSession, getSession } from "../sessions";
 import { hash, compare } from "bcryptjs";
-import prisma from "../../lib/prisma";
+import { createUser, findUserByEmail } from "../db/user";
 
 // サインアップ
 export async function signup({
@@ -14,42 +14,21 @@ export async function signup({
   password: string;
 }) {
   // 同じメールアドレスが登録されているかチェック
-  const existingUser = await prisma.user.findFirst({
-    where: {
-      email: email,
-    },
-  });
+  const existingUser = await findUserByEmail(email);
   if (existingUser) {
     return null;
   }
 
   // ユーザ登録
   const passwordHash = await hash(password, 12);
-  const signUp = await prisma.user.create({
-    // Nested writesで子要素のProfileも同時に生成(トランザクション処理と同義となる)
-    data: {
-      email: email,
-      password: passwordHash,
-      profile: {
-        create: {
-          name: userName,
-          bio: "",
-          // userIdは自動的にUserと関連付けられる
-        },
-      },
-    },
-  });
+  const signUp = await createUser(email, passwordHash, userName);
 
   if (!signUp) {
     return null;
   }
   console.log("Signup sccessed!");
 
-  const user = await prisma.user.findFirst({
-    where: {
-      email: email,
-    },
-  });
+  const user = await findUserByEmail(email);
   if (!user) {
     return null;
   }
@@ -66,11 +45,7 @@ export async function validateCredentials({
   password: string;
 }) {
   // 同じメールアドレスが登録されているかチェック
-  const existingUser = await prisma.user.findFirst({
-    where: {
-      email: email,
-    },
-  });
+  const existingUser = await findUserByEmail(email);
   if (!existingUser) {
     return null;
   }
@@ -82,11 +57,7 @@ export async function validateCredentials({
   }
 
   // id取得
-  const user = await prisma.user.findFirst({
-    where: {
-      email: email,
-    },
-  });
+  const user = await findUserByEmail(email);
 
   return user ? user : null;
 }

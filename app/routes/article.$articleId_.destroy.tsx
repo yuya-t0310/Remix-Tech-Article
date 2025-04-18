@@ -1,9 +1,9 @@
 import { ActionFunctionArgs } from "@remix-run/node";
-import prisma from "../../lib/prisma";
 import invariant from "tiny-invariant";
-import { LoaderFunctionArgs, redirect } from "react-router";
+import { LoaderFunctionArgs } from "react-router";
 import { requireUserSession } from "../data/auth.server";
 import { setFlashMessage } from "../utils/session";
+import { deleteArticleById, findArticleById } from "../db/article";
 
 // GETリクエスト(URL直接打ち込み)が送信された場合のエラーハンドリング
 export const loader = async ({ request }: LoaderFunctionArgs) => {
@@ -19,11 +19,7 @@ export const action = async ({ params, request }: ActionFunctionArgs) => {
   const userId = await requireUserSession(request, "/");
 
   invariant(params.articleId, "Missing articleId params");
-  const deleteArticle = await prisma.article.findFirst({
-    where: {
-      id: parseInt(params.articleId),
-    },
-  });
+  const deleteArticle = await findArticleById(parseInt(params.articleId));
 
   // 操作ユーザと著者ユーザが異なる場合トップページへリダイレクト
   if (parseInt(userId) != deleteArticle?.authorId) {
@@ -35,11 +31,8 @@ export const action = async ({ params, request }: ActionFunctionArgs) => {
   }
 
   // 削除実行
-  await prisma.article.delete({
-    where: {
-      id: parseInt(params.articleId),
-    },
-  });
+  deleteArticleById(parseInt(params.articleId));
+
   return setFlashMessage(
     request,
     { color: "success", message: "記事を削除しました。" },

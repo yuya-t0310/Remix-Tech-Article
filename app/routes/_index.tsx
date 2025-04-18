@@ -1,25 +1,10 @@
 import { useLoaderData } from "@remix-run/react";
-import prisma from "../../lib/prisma";
 import ArticleCard from "../components/ArticleCard";
+import { findLatestArticles } from "../db/article";
 
 export const loader = async () => {
-  // 最新記事取得 selectオプションを使用してパスワード等を取得しないようにする
-  const latestArticles = await prisma.article.findMany({
-    orderBy: { createdAt: "desc" },
-    take: 10,
-    include: {
-      author: {
-        select: {
-          profile: {
-            select: {
-              name: true,
-            },
-          },
-        },
-      },
-      favoritedBy: {},
-    },
-  });
+  // 最新記事取得
+  const latestArticles = await findLatestArticles();
 
   return { latestArticles };
 };

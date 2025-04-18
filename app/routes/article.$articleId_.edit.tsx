@@ -1,21 +1,19 @@
 import { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
-import prisma from "../../lib/prisma";
 import invariant from "tiny-invariant";
 import { requireUserSession } from "../data/auth.server";
 import { setFlashMessage } from "../utils/session";
 import ArticleForm from "../components/ArticleForm";
+import { findArticleById, updateArticleById } from "../db/article";
 
 export const loader = async ({ params, request }: LoaderFunctionArgs) => {
   // ログイン状態でなければトップページへリダイレクト
   const userId = await requireUserSession(request, "/");
 
   invariant(params.articleId, "Missing articleId param");
-  const article = await prisma.article.findFirst({
-    where: {
-      id: parseInt(params.articleId),
-    },
-  });
+
+  // 編集対象の記事を取得
+  const article = await findArticleById(parseInt(params.articleId));
 
   if (!article) {
     throw new Response("Not Found", { status: 404 });
@@ -38,15 +36,11 @@ export const action = async ({ params, request }: ActionFunctionArgs) => {
   const formData = await request.formData();
   const update = Object.fromEntries(formData);
 
-  const article = await prisma.article.update({
-    where: {
-      id: parseInt(params.articleId),
-    },
-    data: {
-      title: update.title as string,
-      content: update.content as string,
-    },
-  });
+  const article = await updateArticleById(
+    parseInt(params.articleId),
+    update.title as string,
+    update.content as string
+  );
 
   let message = { color: "success", message: "編集に成功しました。" };
   // TODO: アプリケーションエラーになる
