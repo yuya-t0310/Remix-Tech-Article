@@ -1,11 +1,48 @@
 # 環境構築
+
+ * Node.jsをインストール
+ * postgresql16をインストール
+ * postgresqlでDB作成
+ * gitからclone
+
+```git
+git init
+
+git clone https://github.com/yuya-t0310/Remix-Tech-Article
+
+cd Remix-Tech-Article
+
+git checkout -b develop
+
+git pull origin develop : develop
+
+git branch --set-upstream-to develop
+```
+
+ * node_modulesのインストール
+
 ```shellscript
-# Node.js, Postgresql116をインストールしておくこと
-
 npm install
+```
 
-# 以下使用ライブラリ コマンド実行は不要
+ * app/.envファイルの作成
 
+```
+DATABASE_URL="postgresql://[username]:[password]@localhost:5432/[DBname]"
+
+SESSION_SECRET=3b8e2f9a1c2d4e5f6a7b8c9d0e1f2g3h4i5j6k7l8m9n0o1p2q3 (適当な文字列)
+```
+
+ * DBのマイグレーション
+
+```
+npx prisma migrate dev --name init
+npx generate
+```
+
+# 以下使用ライブラリ備忘録 コマンド実行は不要
+
+```
 # prisma
 npx prisma
 npx prisma init
