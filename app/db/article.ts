@@ -1,12 +1,15 @@
 import prisma from "./prisma";
+import type { selectedArticle, createdArticle } from "../types/articleTypes";
+import type { Article } from "@prisma/client";
 
 /**
  * 最新記事を取得
  * selectオプションを使用してパスワード等を取得しないようにする
- * @returns
+ * findManyは常に配列を返す
+ * @returns {selectedArticle[]} latestArticles 最新記事の配列
  */
-export const findLatestArticles = async () => {
-  return prisma.article.findMany({
+export const findLatestArticles = async (): Promise<selectedArticle[]> => {
+  return await prisma.article.findMany({
     orderBy: { createdAt: "desc" },
     take: 10,
     include: {
@@ -20,30 +23,56 @@ export const findLatestArticles = async () => {
         },
       },
       favoritedBy: {},
+      // ArticleTag
+      tags: {
+        // Tag
+        include: {
+          tag: true
+        }
+      },
     },
   });
 };
 
 /**
  * IDから記事を取得
- * @param id
- * @returns
+ * @param {number} id 記事のID
+ * @returns {selectedArticle | null} article 検索された記事
  */
-export const findArticleById = async (id: number) => {
-  return prisma.article.findFirst({
+export const findArticleById = async (id: number): Promise<selectedArticle | null> => {
+  return await prisma.article.findFirst({
     where: {
       id: id,
     },
+    include: {
+      author: {
+        select: {
+          profile: {
+            select: {
+              name: true,
+            },
+          },
+        },
+      },
+      favoritedBy: {},
+      // ArticleTag
+      tags: {
+        // Tag
+        include: {
+          tag: true
+        }
+      },
+    }
   });
 };
 
 /**
  * authorIdから記事を取得
- * @param authorId
- * @returns
+ * @param {number} authorId 著者のユーザID
+ * @returns {selectedArticle[]} articles 取得された記事 
  */
-export const findArticleByAuthorId = async (authorId: number) => {
-  return prisma.article.findMany({
+export const findArticleByAuthorId = async (authorId: number): Promise<selectedArticle[]> => {
+  return await prisma.article.findMany({
     where: { authorId: authorId },
     orderBy: { createdAt: "desc" },
     include: {
@@ -57,49 +86,29 @@ export const findArticleByAuthorId = async (authorId: number) => {
         },
       },
       favoritedBy: {},
-    },
-  });
-};
-
-/**
- * IDから記事を取得
- * @param id
- * @returns
- */
-export const findArticleDetailById = async (id: number) => {
-  return prisma.article.findFirst({
-    where: {
-      id: id,
-    },
-    include: {
-      author: {
-        select: {
-          profile: {
-            select: {
-              name: true,
-            },
-          },
-        },
+      tags: {
+        include: {
+          tag: true
+        }
       },
-      favoritedBy: {},
     },
   });
 };
 
 /**
  * 記事を追加する
- * @param title
- * @param authorId
- * @param content
- * @param tags
- * @returns
+ * @param {string} title 記事タイトル
+ * @param {number} authorId ユーザID
+ * @param {string} content 記事内容
+ * @param {string[]} tags タグ
+ * @returns {createdArticle} article 作成された記事
  */
 export const createArticle = async (
   title: string,
   authorId: number,
   content: string,
   tags: string[]
-) => {
+): Promise<createdArticle> => {
   return await prisma.article.create({
     data: {
       title: title,
@@ -134,17 +143,17 @@ export const createArticle = async (
 
 /**
  * 指定IDのタイトルと内容を更新
- * @param id
- * @param title
- * @param content
- * @returns
+ * @param {number} id 記事のID
+ * @param {string} title 記事タイトル
+ * @param {string} content 記事内容
+ * @returns {Article} updatedArticle 更新後の記事
  */
 export const updateArticleById = async (
   id: number,
   title: string,
   content: string
-) => {
-  return prisma.article.update({
+): Promise<Article> => {
+  return await prisma.article.update({
     where: {
       id: id,
     },
@@ -157,12 +166,12 @@ export const updateArticleById = async (
 
 /**
  * viewCountをインクリメント updatedAtは更新しない
- * @param id
- * @param date
- * @returns
+ * @param {number} id 記事のID
+ * @param {Date} date 現在のupdatedAt
+ * @returns {Article} updatedArticle 更新後の記事
  */
-export const incrementArticleViewCount = async (id: number, date: Date) => {
-  return prisma.article.update({
+export const incrementArticleViewCount = async (id: number, date: Date): Promise<Article> => {
+  return await prisma.article.update({
     where: {
       id: id,
     },
@@ -178,7 +187,7 @@ export const incrementArticleViewCount = async (id: number, date: Date) => {
 
 /**
  * IDを指定して記事を削除
- * TODO: Favoriteからも削除する必要アリ
+ * TODO: Favorite, Tag, ArticleTagからも削除する必要アリ
  * @param id
  * @returns
  */

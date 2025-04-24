@@ -12,10 +12,7 @@ import ArticleViewerTitle from "../components/ArticleViewerTitle";
 import ArticleViewerContent from "../components/ArticleViewerContent";
 import EditBtn from "../components/EditBtn";
 import DeleteBtn from "../components/DeleteBtn";
-import {
-  findArticleDetailById,
-  incrementArticleViewCount,
-} from "../db/article";
+import { findArticleById, incrementArticleViewCount } from "../db/article";
 import { findFavorite, addFavorite, removeFavorite } from "../db/favorite";
 
 export const loader = async ({ params, request }: LoaderFunctionArgs) => {
@@ -25,7 +22,7 @@ export const loader = async ({ params, request }: LoaderFunctionArgs) => {
 
   // article.$articleId.tsx → $xxxをparam.xxxで取得できる
   invariant(params.articleId, "Missing articleId param");
-  const article = await findArticleDetailById(parseInt(params.articleId));
+  const article = await findArticleById(parseInt(params.articleId));
 
   if (!article) {
     throw new Response("Not Found", { status: 404 });
