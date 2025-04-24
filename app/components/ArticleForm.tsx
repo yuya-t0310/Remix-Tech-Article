@@ -26,6 +26,33 @@ function ArticleForm({ article }: { article: Article | null }) {
       </div>
 
       <div className="m-2">
+        <div className="font-light">タグ</div>
+        <div className="flex justify-start space-x-2">
+          <input
+            name="tag_0"
+            type="text"
+            aria-label="tag_0"
+            placeholder="タグ"
+            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#7ec7d8] focus:border-[#7ec7d8] outline-none transition-colors"
+          />
+          <input
+            name="tag_1"
+            type="text"
+            aria-label="tag_1"
+            placeholder="タグ"
+            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#7ec7d8] focus:border-[#7ec7d8] outline-none transition-colors"
+          />
+          <input
+            name="tag_2"
+            type="text"
+            aria-label="tag_2"
+            placeholder="タグ"
+            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#7ec7d8] focus:border-[#7ec7d8] outline-none transition-colors"
+          />
+        </div>
+      </div>
+
+      <div className="m-2">
         <div className="font-light">内容</div>
         <textarea
           value={markdown}

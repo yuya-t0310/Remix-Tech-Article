@@ -14,12 +14,22 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 export const action = async ({ request }: ActionFunctionArgs) => {
   const userId = await requireUserSession(request, "/");
   const formData = await request.formData();
-  const insert = Object.fromEntries(formData);
+  const tags: string[] = [];
 
+  // タグ配列の作成
+  for (let i = 0; formData.has(`tag_${i}`); i++) {
+    const tag: string = formData.get(`tag_${i}`) as string;
+    if (tag && tag.trim() !== "") {
+      tags.push(tag);
+    }
+  }
+
+  // 記事作成
   const article = await createArticle(
-    insert.title as string,
+    formData.get("title") as string,
     parseInt(userId),
-    insert.content as string
+    formData.get("content") as string,
+    tags
   );
 
   let message = { color: "success", message: "投稿に成功しました。" };

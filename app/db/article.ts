@@ -91,20 +91,44 @@ export const findArticleDetailById = async (id: number) => {
  * @param title
  * @param authorId
  * @param content
+ * @param tags
  * @returns
  */
 export const createArticle = async (
   title: string,
   authorId: number,
-  content: string
+  content: string,
+  tags: string[]
 ) => {
-  return prisma.article.create({
+  return await prisma.article.create({
     data: {
       title: title,
       authorId: authorId,
       content: content,
       viewCount: 0,
+      // ArticleTag
+      tags: {
+        create: tags.map(tag => ({
+          // articleIdは自動的にArticleと紐づけられる
+          // tagIdはTagテーブルに存在すれば取得し、存在しなければcreateする
+          // Tag
+          tag: {
+            connectOrCreate: {
+                where: { name: tag },
+                create: { name: tag },
+            }
+          }
+        }))
+      }
     },
+    // 作成されたタグ情報の取得
+    include : {
+      tags: {
+        include: {
+          tag: true
+        }
+      }
+    }
   });
 };
 
