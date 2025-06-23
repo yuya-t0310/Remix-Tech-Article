@@ -96,6 +96,42 @@ export const findArticleByAuthorId = async (authorId: number): Promise<selectedA
 };
 
 /**
+ * tagから記事を取得
+ * @param {tag} tag 記事に付けられたタグ
+ * @return {selectedArticle[]} articles 取得された記事
+ */
+export const findArticleByTag = async (tag: string): Promise<selectedArticle[]> => {
+  return await prisma.article.findMany({
+    where: {
+      tags: {
+        some: {
+          tag: {
+            name: tag,
+          },
+        },
+      },
+    },
+    include: {
+      author: {
+        select: {
+          profile: {
+            select: {
+              name: true,
+            },
+          },
+        },
+      },
+      favoritedBy: {},
+      tags: {
+        include: {
+          tag: true
+        }
+      },
+    },
+  })
+}
+
+/**
  * 記事を追加する
  * @param {string} title 記事タイトル
  * @param {number} authorId ユーザID
