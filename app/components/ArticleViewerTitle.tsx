@@ -1,18 +1,7 @@
 import { formatDate } from "../utils/commonFunction";
+import type { selectedArticle } from "../types/articleTypes";
 
-type Article = {
-  id: number;
-  title: string;
-  content: string;
-  viewCount: number;
-  createdAt: Date;
-  updatedAt: Date;
-  authorId: number;
-  author: { profile: { name: string } | null };
-  favoritedBy: { id: number; userId: number; articleId: number }[];
-};
-
-function ArticleViewerTitle({ article }: { article: Article }) {
+function ArticleViewerTitle({ article }: { article: selectedArticle }) {
   return (
     <>
       <div className="mt-8">

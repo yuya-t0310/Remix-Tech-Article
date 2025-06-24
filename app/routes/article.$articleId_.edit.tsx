@@ -1,10 +1,12 @@
 import { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
+import prisma from "../db/prisma";
 import invariant from "tiny-invariant";
 import { requireUserSession } from "../data/auth.server";
 import { setFlashMessage } from "../utils/session";
 import ArticleForm from "../components/ArticleForm";
 import { findArticleById, updateArticleById } from "../db/article";
+import { deleteTagsByArticleId } from "../db/articleTag";
 
 export const loader = async ({ params, request }: LoaderFunctionArgs) => {
   // ログイン状態でなければトップページへリダイレクト
@@ -33,19 +35,38 @@ export const loader = async ({ params, request }: LoaderFunctionArgs) => {
 
 export const action = async ({ params, request }: ActionFunctionArgs) => {
   invariant(params.articleId, "Missing articleId param");
+  const articleId = parseInt(params.articleId);
   const formData = await request.formData();
   const update = Object.fromEntries(formData);
+  const tags: string[] = [];
+  let message: { color: string; message: string };
 
-  const article = await updateArticleById(
-    parseInt(params.articleId),
-    update.title as string,
-    update.content as string
-  );
+  // タグ配列の作成
+  for (let i = 0; formData.has(`tag_${i}`); i++) {
+    const tag: string = formData.get(`tag_${i}`) as string;
+    if (tag && tag.trim() !== "") {
+      tags.push(tag);
+    }
+  }
 
-  let message = { color: "success", message: "編集に成功しました。" };
-  // TODO: アプリケーションエラーになる
-  if (!article) {
+  // 更新処理
+  message = { color: "success", message: "編集に成功しました。" };
+  try {
+    await prisma.$transaction(async () => {
+      // ArticleTagテーブルから削除
+      await deleteTagsByArticleId(articleId);
+      // 記事更新
+      const article = await updateArticleById(
+        articleId,
+        update.title as string,
+        update.content as string,
+        tags
+      );
+    });
+  } catch (error) {
     message = { color: "error", message: "編集に失敗しました。" };
+  } finally {
+    await prisma.$disconnect();
   }
 
   return setFlashMessage(request, message, `/article/${params.articleId}`);

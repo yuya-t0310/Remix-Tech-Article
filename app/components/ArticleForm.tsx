@@ -3,9 +3,9 @@ import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
 import remarkGfm from "remark-gfm";
 import { Form } from "@remix-run/react";
-import { Article } from "@prisma/client";
+import { selectedArticle } from "../types/articleTypes";
 
-function ArticleForm({ article }: { article: Article | null }) {
+function ArticleForm({ article }: { article: selectedArticle | null }) {
   const [markdown, setMarkDown] = useState<string>(
     article ? article.content : ""
   );
@@ -23,6 +23,24 @@ function ArticleForm({ article }: { article: Article | null }) {
           required
           className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#7ec7d8] focus:border-[#7ec7d8] outline-none transition-colors"
         />
+      </div>
+
+      <div className="m-2">
+        <div className="font-light">タグ</div>
+        <div className="flex justify-start space-x-2">
+          {Array.from({ length: 3 }, (_, i) => (
+            <input
+              key={i}
+              name={`tag_${i}`}
+              type="text"
+              aria-label={`tag_${i}`}
+              placeholder="タグ"
+              // タグがなければ空文字
+              defaultValue={article?.tags[i]?.tag.name ?? ""}
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#7ec7d8] focus:border-[#7ec7d8] outline-none transition-colors"
+            />
+          ))}
+        </div>
       </div>
 
       <div className="m-2">

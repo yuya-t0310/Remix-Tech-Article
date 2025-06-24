@@ -1,19 +1,13 @@
 import { Link } from "@remix-run/react";
 import { formatDate } from "../utils/commonFunction";
+import type { selectedArticle } from "../types/articleTypes";
+import ArticleTag from "./ArticleTag";
 
-type Article = {
-  id: number;
-  title: string;
-  content: string;
-  viewCount: number;
-  createdAt: Date;
-  updatedAt: Date;
-  authorId: number;
-  author: { profile: { name: string } | null };
-  favoritedBy: { id: number; userId: number; articleId: number }[];
-};
-
-export default function ArticleCard({ article }: { article: Article }) {
+export default function ArticleCard({ article }: { article: selectedArticle }) {
+  const tags: string[] = [];
+  article.tags.map((articleTag) => {
+    tags.push(articleTag.tag.name);
+  });
   return (
     <>
       <div className="shadow-md max-w-96 p-4 bg-[#7ec7d8]/25 rounded-md">
@@ -36,6 +30,15 @@ export default function ArticleCard({ article }: { article: Article }) {
             <span className="i-iconoir-eye">{article.viewCount}</span>
             <span className="text-xs">{article.viewCount}</span>
           </span>
+        </div>
+        <div className="space-x-1 flex justyfy-start">
+          {tags.map((tag) => {
+            return (
+              <div key={tag}>
+                <ArticleTag tag={tag} />
+              </div>
+            );
+          })}
         </div>
       </div>
     </>

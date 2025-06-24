@@ -1,23 +1,12 @@
 import { useFetcher } from "@remix-run/react";
-
-type Article = {
-  id: number;
-  title: string;
-  content: string;
-  viewCount: number;
-  createdAt: Date;
-  updatedAt: Date;
-  authorId: number;
-  author: { profile: { name: string } | null };
-  favoritedBy: { id: number; userId: number; articleId: number }[];
-};
+import type { selectedArticle } from "../types/articleTypes";
 
 export default function Favorite({
   isFavorite,
   article,
 }: {
   isFavorite: boolean;
-  article: Article;
+  article: selectedArticle;
 }) {
   const fetcher = useFetcher();
   // Optimistic UIのため
