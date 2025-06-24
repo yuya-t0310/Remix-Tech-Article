@@ -41,4 +41,22 @@ export type createdArticle = {
   };
   }[];
 };
-  
+
+
+export type updatedArticle = {
+  id: number;
+  title: string;
+  content: string;
+  viewCount: number;
+  createdAt: Date;
+  updatedAt: Date;
+  authorId: number;
+  tags: {
+  articleId: number;
+  tagId: number;
+  tag: {
+  id: number;
+  name: string;
+  };
+  }[];
+};

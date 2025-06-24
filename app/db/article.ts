@@ -1,5 +1,6 @@
 import prisma from "./prisma";
-import type { selectedArticle, createdArticle } from "../types/articleTypes";
+import type { selectedArticle, createdArticle, updatedArticle } from "../types/articleTypes";
+import { deleteTagsByArticleId } from "./articleTag";
 import type { Article } from "@prisma/client";
 
 /**
@@ -182,12 +183,14 @@ export const createArticle = async (
  * @param {number} id 記事のID
  * @param {string} title 記事タイトル
  * @param {string} content 記事内容
- * @returns {Article} updatedArticle 更新後の記事
+ * @param {string[]} tags タグ
+ * @returns {updatedArticle} updatedArticle 更新後の記事
  */
 export const updateArticleById = async (
   id: number,
   title: string,
-  content: string
+  content: string,
+  tags: string[]
 ): Promise<Article> => {
   return await prisma.article.update({
     where: {
@@ -196,7 +199,28 @@ export const updateArticleById = async (
     data: {
       title: title,
       content: content,
+      tags: {
+        create: tags.map(tag => ({
+          // articleIdは自動的にArticleと紐づけられる
+          // tagIdはTagテーブルに存在すれば取得し、存在しなければcreateする
+          // Tag
+          tag: {
+            connectOrCreate: {
+                where: { name: tag },
+                create: { name: tag },
+            }
+          }
+        }))
+      }
     },
+    // 作成されたタグ情報の取得
+    include : {
+      tags: {
+        include: {
+          tag: true
+        }
+      }
+    }
   });
 };
 
@@ -234,3 +258,4 @@ export const deleteArticleById = async (id: number) => {
     },
   });
 };
+
