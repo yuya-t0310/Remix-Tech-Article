@@ -251,8 +251,8 @@ export const incrementArticleViewCount = async (id: number, date: Date): Promise
  * @param id
  * @returns
  */
-export const deleteArticleById = async (id: number) => {
-  return prisma.article.delete({
+export const deleteArticleById = async (id: number): Promise<void> => {
+  await prisma.article.delete({
     where: {
       id: id,
     },

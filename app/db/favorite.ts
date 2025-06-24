@@ -46,3 +46,15 @@ export const removeFavorite = async (userId: number, articleId: number) => {
     },
   });
 };
+
+/**
+ * 記事IDを指定してFavoriteテーブルから削除
+ * @param {number} articleId 記事のID
+ */
+export const deleteFavoriteByArticleId = async (articleId: number): Promise<void> => {
+  await prisma.favorite.deleteMany({
+    where: {
+      articleId: articleId
+    }
+  })
+}

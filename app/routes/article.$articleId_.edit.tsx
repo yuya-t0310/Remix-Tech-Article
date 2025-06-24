@@ -7,7 +7,6 @@ import { setFlashMessage } from "../utils/session";
 import ArticleForm from "../components/ArticleForm";
 import { findArticleById, updateArticleById } from "../db/article";
 import { deleteTagsByArticleId } from "../db/articleTag";
-import Article from "./article.$articleId";
 
 export const loader = async ({ params, request }: LoaderFunctionArgs) => {
   // ログイン状態でなければトップページへリダイレクト
@@ -55,9 +54,9 @@ export const action = async ({ params, request }: ActionFunctionArgs) => {
   try {
     await prisma.$transaction(async () => {
       // ArticleTagテーブルから削除
-      deleteTagsByArticleId(articleId);
+      await deleteTagsByArticleId(articleId);
       // 記事更新
-      const article = updateArticleById(
+      const article = await updateArticleById(
         articleId,
         update.title as string,
         update.content as string,
